@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>[hidden]{display:none!important}body{margin:0}</style>
+<title>ভাই আপনি কিন্তু পুন্ডা আছেন</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: one centered column. Key field on top, big live code in the middle, tuning options folded below. */
+:root {
+  --bg: #eef1f0;
+  --surface: #ffffff;
+  --fg: #16201e;
+  --muted: #5b6a66;
+  --line: #d3dbd8;
+  --accent: #0b7a5f;
+  --accent-fg: #ffffff;
+  --warn: #c2570c;
+  --danger: #b3261e;
+  --code-bg: #e3efeb;
+  --font-body: "Hind Siliguri", "Noto Sans Bengali", system-ui, sans-serif;
+  --font-code: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1615;
+    --surface: #17211f;
+    --fg: #e6efec;
+    --muted: #8fa19c;
+    --line: #2a3835;
+    --accent: #3cc9a0;
+    --accent-fg: #07201a;
+    --warn: #f0a15a;
+    --danger: #ff8a80;
+    --code-bg: #1d2b28;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1615;
+  --surface: #17211f;
+  --fg: #e6efec;
+  --muted: #8fa19c;
+  --line: #2a3835;
+  --accent: #3cc9a0;
+  --accent-fg: #07201a;
+  --warn: #f0a15a;
+  --danger: #ff8a80;
+  --code-bg: #1d2b28;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  padding-block: 32px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+h1 { font-size: 1.6rem; line-height: 1.25; margin: 0; font-weight: 700; text-wrap: balance; }
+.lead { margin: 4px 0 0; color: var(--muted); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+label.field { font-weight: 600; font-size: 0.95rem; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+input[type="text"], select {
+  flex: 1 1 200px; min-width: 0; font: inherit; color: var(--fg); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+}
+input[type="text"] { font-family: var(--font-code); font-size: 0.95rem; letter-spacing: 0.04em; }
+input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+button {
+  font: inherit; font-weight: 600; cursor: pointer; border-radius: 8px; padding: 10px 16px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--fg);
+}
+button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.hint { font-size: 0.875rem; color: var(--muted); margin: 0; }
+.err { color: var(--danger); font-size: 0.9rem; margin: 0; min-height: 1.4em; }
+.display { display: flex; flex-direction: column; align-items: center; gap: 12px; padding-block: 8px; }
+.code {
+  font-family: var(--font-code); font-weight: 700; font-size: clamp(2.2rem, 12vw, 3.2rem);
+  letter-spacing: 0.08em; background: var(--code-bg); border-radius: 10px; padding: 12px 22px;
+  font-variant-numeric: tabular-nums; max-width: 100%; text-align: center; user-select: all;
+}
+.code.low { color: var(--warn); }
+.timer { display: flex; align-items: center; gap: 10px; width: 100%; }
+.bar { flex: 1; height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.bar > span { display: block; height: 100%; width: 100%; background: var(--accent); transform-origin: left center; }
+.bar.low > span { background: var(--warn); }
+.secs { font-family: var(--font-code); font-variant-numeric: tabular-nums; min-width: 3.2ch; text-align: right; color: var(--muted); }
+.next { color: var(--muted); font-size: 0.9rem; }
+.next b { font-family: var(--font-code); color: var(--fg); letter-spacing: 0.06em; }
+details summary { cursor: pointer; font-weight: 600; }
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 12px; }
+.opts label { display: flex; flex-direction: column; gap: 4px; font-size: 0.875rem; color: var(--muted); }
+.opts select { flex: none; }
+.badge { display: inline-block; font-size: 0.78rem; font-weight: 600; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; }
+.note { font-size: 0.875rem; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+.note p { margin: 0; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<main>
+  <header>
+    <h1>ভাই আপনি কিন্তু পুন্ডা আছেন</h1>
+    <p class="lead">২-ধাপ যাচাইয়ের সিক্রেট কী বসান, সেই মুহূর্তের ৬ ডিজিটের কোড পেয়ে যান।</p>
+  </header>
+
+  <section class="panel" aria-label="সিক্রেট কী">
+    <label class="field" for="secret">সিক্রেট কী (Setup key)</label>
+    <div class="row">
+      <input type="text" id="secret" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="যেমন: JBSW Y3DP EHPK 3PXP">
+      <button type="button" id="clear">মুছুন</button>
+    </div>
+    <p class="hint" id="sampleHint"><span class="badge">উদাহরণ</span> এটা পরীক্ষার জন্য একটা নমুনা কী। নিজের কী বসাতে ঘরটিতে ক্লিক করে পেস্ট করুন। <code>otpauth://</code> লিংক পেস্ট করলেও চলবে।</p>
+    <p class="err" id="err" role="alert"></p>
+  </section>
+
+  <section class="panel" aria-label="বর্তমান কোড" aria-live="off">
+    <div class="display">
+      <div class="code" id="code">--- ---</div>
+      <div class="timer">
+        <div class="bar" id="bar"><span id="barFill"></span></div>
+        <div class="secs" id="secs">30s</div>
+      </div>
+      <div class="next">পরের কোড: <b id="next">--- ---</b></div>
+      <button type="button" class="primary" id="copy">কোড কপি করুন</button>
+    </div>
+    <details>
+      <summary>অ্যাডভান্সড সেটিং</summary>
+      <div class="opts">
+        <label for="digits">ডিজিট
+          <select id="digits"><option value="6" selected>৬</option><option value="7">৭</option><option value="8">৮</option></select>
+        </label>
+        <label for="period">কত সেকেন্ড পরপর বদলায়
+          <select id="period"><option value="30" selected>৩০</option><option value="60">৬০</option></select>
+        </label>
+        <label for="algo">অ্যালগরিদম
+          <select id="algo"><option value="SHA-1" selected>SHA-1</option><option value="SHA-256">SHA-256</option><option value="SHA-512">SHA-512</option></select>
+        </label>
+      </div>
+      <p class="hint" style="margin-top:10px">ফেসবুক ও গুগলসহ প্রায় সব সার্ভিসে ডিফল্ট (৬ ডিজিট, ৩০ সেকেন্ড, SHA-1) ঠিক থাকে।</p>
+    </details>
+  </section>
+
+  <section class="note">
+    <p>হিসাব পুরোটাই আপনার ব্রাউজারে হয়। কী বা কোড কোথাও পাঠানো বা সংরক্ষণ করা হয় না। পেজ বন্ধ করলে কী মুছে যায়।</p>
+    <p>সিক্রেট কী পাসওয়ার্ডের মতো গোপন রাখুন। যে এটা পাবে সে আপনার ২-ধাপ কোড বানাতে পারবে। শুধু নিজের অ্যাকাউন্টের কী ব্যবহার করুন।</p>
+    <p>আপনার ফোনের ঘড়ি/কম্পিউটারের সময় ঠিক না থাকলে কোড মিলবে না।</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var secretEl = $("secret"), errEl = $("err"), codeEl = $("code"), nextEl = $("next");
+  var barEl = $("bar"), fillEl = $("barFill"), secsEl = $("secs"), copyBtn = $("copy");
+  var SAMPLE = "JBSWY3DPEHPK3PXP";
+  var ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  var keyCache = { raw: "", algo: "", key: null };
+  var lastCode = "";
+  var busy = false;
+
+  function base32Decode(str) {
+    var clean = str.toUpperCase().replace(/[\s\-=]/g, "");
+    if (!clean) return null;
+    var bits = 0, value = 0, out = [];
+    for (var i = 0; i < clean.length; i++) {
+      var idx = ALPHABET.indexOf(clean[i]);
+      if (idx < 0) throw new Error("কীতে ভুল অক্ষর আছে: “" + clean[i] + "”। শুধু A-Z আর ২-৭ চলবে।");
+      value = (value << 5) | idx;
+      bits += 5;
+      if (bits >= 8) { out.push((value >>> (bits - 8)) & 255); bits -= 8; }
+    }
+    if (out.length < 10) throw new Error("কীটি খুব ছোট মনে হচ্ছে। পুরো কীটি কপি করেছেন কি?");
+    return new Uint8Array(out);
+  }
+
+  function applyUri(text) {
+    try {
+      var u = new URL(text.trim());
+      var s = u.searchParams.get("secret");
+      if (s) secretEl.value = s;
+      var d = u.searchParams.get("digits"); if (d && /^[678]$/.test(d)) $("digits").value = d;
+      var p = u.searchParams.get("period"); if (p && /^(30|60)$/.test(p)) $("period").value = p;
+      var a = (u.searchParams.get("algorithm") || "").toUpperCase();
+      var map = { SHA1: "SHA-1", SHA256: "SHA-256", SHA512: "SHA-512" };
+      if (map[a]) $("algo").value = map[a];
+    } catch (e) { /* not a valid URI, leave as typed */ }
+  }
+
+  async function getKey(raw, algo) {
+    if (keyCache.raw === raw && keyCache.algo === algo && keyCache.key) return keyCache.key;
+    var bytes = base32Decode(raw);
+    if (!bytes) return null;
+    var key = await crypto.subtle.importKey("raw", bytes, { name: "HMAC", hash: algo }, false, ["sign"]);
+    keyCache = { raw: raw, algo: algo, key: key };
+    return key;
+  }
+
+  async function hotp(key, counter, digits) {
+    var buf = new ArrayBuffer(8), view = new DataView(buf);
+    view.setUint32(0, Math.floor(counter / 4294967296));
+    view.setUint32(4, counter >>> 0);
+    var mac = new Uint8Array(await crypto.subtle.sign("HMAC", key, buf));
+    var off = mac[mac.length - 1] & 15;
+    var bin = ((mac[off] & 127) << 24) | (mac[off + 1] << 16) | (mac[off + 2] << 8) | mac[off + 3];
+    var s = String(bin % Math.pow(10, digits));
+    while (s.length < digits) s = "0" + s;
+    return s;
+  }
+
+  function group(s) {
+    var h = Math.ceil(s.length / 2);
+    return s.slice(0, h) + " " + s.slice(h);
+  }
+
+  function showError(msg) {
+    errEl.textContent = msg || "";
+    if (msg) { codeEl.textContent = "--- ---"; nextEl.textContent = "--- ---"; lastCode = ""; }
+  }
+
+  async function tick() {
+    if (busy) return;
+    busy = true;
+    try {
+      var period = parseInt($("period").value, 10);
+      var digits = parseInt($("digits").value, 10);
+      var algo = $("algo").value;
+      var nowSec = Date.now() / 1000;
+      var counter = Math.floor(nowSec / period);
+      var left = period - (nowSec - counter * period);
+      var frac = left / period;
+      fillEl.style.transform = "scaleX(" + frac.toFixed(4) + ")";
+      secsEl.textContent = Math.ceil(left) + "s";
+      var low = left <= 5;
+      barEl.classList.toggle("low", low);
+      codeEl.classList.toggle("low", low);
+
+      var raw = secretEl.value;
+      if (!raw.trim()) { showError(""); return; }
+      var key = await getKey(raw, algo);
+      if (!key) { showError(""); return; }
+      var cur = await hotp(key, counter, digits);
+      var nxt = await hotp(key, counter + 1, digits);
+      errEl.textContent = "";
+      lastCode = cur;
+      codeEl.textContent = group(cur);
+      nextEl.textContent = group(nxt);
+    } catch (e) {
+      keyCache.key = null;
+      showError(e && e.message ? e.message : "কোড বানানো যায়নি।");
+    } finally {
+      busy = false;
+    }
+  }
+
+  secretEl.addEventListener("input", function () {
+    $("sampleHint").hidden = true;
+    var v = secretEl.value;
+    if (/^otpauth:\/\//i.test(v.trim())) applyUri(v);
+    tick();
+  });
+  secretEl.addEventListener("focus", function () { secretEl.select(); });
+  ["digits", "period", "algo"].forEach(function (id) { $(id).addEventListener("change", tick); });
+
+  $("clear").addEventListener("click", function () {
+    secretEl.value = "";
+    $("sampleHint").hidden = true;
+    keyCache.key = null;
+    showError("");
+    secretEl.focus();
+  });
+
+  copyBtn.addEventListener("click", function () {
+    if (!lastCode) return;
+    function done(ok) {
+      copyBtn.textContent = ok ? "কপি হয়েছে" : "কোডটি সিলেক্ট করে কপি করুন";
+      if (!ok) { var r = document.createRange(); r.selectNodeContents(codeEl); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
+      setTimeout(function () { copyBtn.textContent = "কোড কপি করুন"; }, 1800);
+    }
+    try {
+      navigator.clipboard.writeText(lastCode).then(function () { done(true); }, function () { done(false); });
+    } catch (e) { done(false); }
+  });
+
+  secretEl.value = SAMPLE;
+  tick();
+  setInterval(tick, 250);
+})();
+</script>
+</body>
+</html>
